@@ -5,143 +5,125 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-gradient-to-br from-primary-50 via-white to-primary-50 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
 
-                    {{-- Dashboard Heading --}}
-                    <h3 class="text-2xl font-bold text-primary-600 mb-4">
-                        Admin Dashboard
-                    </h3>
+            {{-- Welcome Section --}}
+            <div class="text-center mb-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                    Welcome, <span class="text-primary-600">{{ auth()->user()->name }}</span>
+                </h1>
+                <p class="text-gray-600">ISFinance Administration Panel</p>
+            </div>
 
-                    {{-- Welcome Message --}}
-                    <p class="text-lg text-gray-700 mb-6">
-                        Welcome, <span class="font-semibold">{{ auth()->user()->name }}</span>! This is your admin
-                        dashboard.
-                    </p>
-
-                    {{-- Dashboard Content Placeholder --}}
-                    <div class="grid md:grid-cols-3 gap-6 mt-8">
-
-                        {{-- Card 1: Pending Applications --}}
-                        <div
-                            class="bg-primary-50 border border-primary-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-300">
-                            <div class="flex items-center mb-4">
-                                <svg class="w-8 h-8 text-primary-600 mr-3" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <h4 class="text-lg font-bold text-gray-800">Pending Applications</h4>
-                            </div>
-                            <p class="text-gray-600 text-sm mb-4">
-                                Review and approve loan applications
-                            </p>
-                            <div class="text-3xl font-bold text-primary-600 mb-4">0</div>
-                            <button
-                                class="w-full bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors duration-300 font-semibold">
-                                Coming Soon
-                            </button>
-                        </div>
-
-                        {{-- Card 2: Approved Loans --}}
-                        <div
-                            class="bg-green-50 border border-green-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-300">
-                            <div class="flex items-center mb-4">
-                                <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <h4 class="text-lg font-bold text-gray-800">Approved Loans</h4>
-                            </div>
-                            <p class="text-gray-600 text-sm mb-4">
-                                View all approved loan applications
-                            </p>
-                            <div class="text-3xl font-bold text-green-600 mb-4">0</div>
-                            <button
-                                class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-300 font-semibold">
-                                Coming Soon
-                            </button>
-                        </div>
-
-                        {{-- Card 3: Rejected Applications --}}
-                        <div
-                            class="bg-red-50 border border-red-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-300">
-                            <div class="flex items-center mb-4">
-                                <svg class="w-8 h-8 text-red-600 mr-3" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <h4 class="text-lg font-bold text-gray-800">Rejected Applications</h4>
-                            </div>
-                            <p class="text-gray-600 text-sm mb-4">
-                                View rejected loan applications
-                            </p>
-                            <div class="text-3xl font-bold text-red-600 mb-4">0</div>
-                            <button
-                                class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300 font-semibold">
-                                Coming Soon
-                            </button>
-                        </div>
-
-                    </div>
-
-                    {{-- Statistics Section --}}
-                    <div class="mt-8">
-                        <h4 class="text-xl font-bold text-gray-800 mb-4">System Statistics</h4>
-                        <div class="grid md:grid-cols-4 gap-4">
-
-                            {{-- Total Users --}}
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                                <p class="text-sm text-gray-600 mb-2">Total Users</p>
-                                <p class="text-2xl font-bold text-blue-600">0</p>
-                            </div>
-
-                            {{-- Total Borrowers --}}
-                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
-                                <p class="text-sm text-gray-600 mb-2">Total Borrowers</p>
-                                <p class="text-2xl font-bold text-purple-600">0</p>
-                            </div>
-
-                            {{-- Total Loan Amount --}}
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-                                <p class="text-sm text-gray-600 mb-2">Total Loan Amount</p>
-                                <p class="text-2xl font-bold text-yellow-600">RM 0</p>
-                            </div>
-
-                            {{-- Active Loans --}}
-                            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 text-center">
-                                <p class="text-sm text-gray-600 mb-2">Active Loans</p>
-                                <p class="text-2xl font-bold text-indigo-600">0</p>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    {{-- Info Message --}}
-                    <div class="mt-8 bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-blue-700">
-                                    <strong>Note:</strong> Loan approval and management features are currently under
-                                    development and will be available soon.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
+            {{-- Stats Cards --}}
+            <div class="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
+                <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-yellow-500">
+                    <p class="text-sm text-gray-500">Pending</p>
+                    <p class="text-3xl font-bold text-yellow-600">{{ $stats['pending'] ?? 0 }}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-blue-500">
+                    <p class="text-sm text-gray-500">Approved</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ $stats['approved'] ?? 0 }}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-green-500">
+                    <p class="text-sm text-gray-500">Disbursed</p>
+                    <p class="text-3xl font-bold text-green-600">{{ $stats['disbursed'] ?? 0 }}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-gray-500">
+                    <p class="text-sm text-gray-500">Completed</p>
+                    <p class="text-3xl font-bold text-gray-600">{{ $stats['completed'] ?? 0 }}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-purple-500">
+                    <p class="text-sm text-gray-500">Total Borrowers</p>
+                    <p class="text-3xl font-bold text-purple-600">{{ $stats['total_users'] ?? 0 }}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-primary-500">
+                    <p class="text-sm text-gray-500">Total Disbursed</p>
+                    <p class="text-2xl font-bold text-primary-600">RM
+                        {{ number_format($stats['total_disbursed'] ?? 0, 0) }}</p>
                 </div>
             </div>
+
+            {{-- Quick Actions --}}
+            <div class="grid md:grid-cols-3 gap-6 mb-10">
+                <a href="{{ route('admin.loans.index', ['status' => 'pending']) }}"
+                    class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-l-4 border-yellow-500 group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Pending Approvals</h3>
+                            <p class="text-gray-600 text-sm">Review loan applications</p>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-full group-hover:bg-yellow-200 transition-colors">
+                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    @if(($stats['pending'] ?? 0) > 0)
+                        <div
+                            class="mt-4 inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-semibold rounded-full">
+                            {{ $stats['pending'] }} awaiting review
+                        </div>
+                    @endif
+                </a>
+
+                <a href="{{ route('admin.loans.index', ['status' => 'approved']) }}"
+                    class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-l-4 border-blue-500 group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Ready for Disbursement</h3>
+                            <p class="text-gray-600 text-sm">Approved loans pending disbursement</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full group-hover:bg-blue-200 transition-colors">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    @if(($stats['approved'] ?? 0) > 0)
+                        <div
+                            class="mt-4 inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
+                            {{ $stats['approved'] }} ready to disburse
+                        </div>
+                    @endif
+                </a>
+
+                <a href="{{ route('admin.loans.index', ['status' => 'all']) }}"
+                    class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-l-4 border-gray-500 group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">All Loans</h3>
+                            <p class="text-gray-600 text-sm">View complete loan history</p>
+                        </div>
+                        <div class="bg-gray-100 p-3 rounded-full group-hover:bg-gray-200 transition-colors">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            {{-- Info Box --}}
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                <div class="flex">
+                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="ml-3 text-sm text-blue-700">
+                        <strong>ISFinance Admin:</strong> This is a prototype demonstration. All blockchain transactions
+                        are simulated.
+                    </p>
+                </div>
+            </div>
+
         </div>
     </div>
 </x-app-layout>

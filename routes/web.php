@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Borrower\WalletController;
+use App\Http\Controllers\Borrower\LoanController;
+use App\Http\Controllers\Borrower\RepaymentController;
+use App\Http\Controllers\Admin\AdminLoanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,29 +27,66 @@ Route::middleware('auth')->group(function () {
 });
 
 // ========================================
-// ROLE-BASED ROUTES
+// BORROWER ROUTES
 // ========================================
 
-/**
- * Testing Checklist for Role-Based Access:
- * [ ] Login as admin → redirected to admin dashboard
- * [ ] Login as borrower → redirected to borrower dashboard
- * [ ] Borrower accessing /admin/dashboard → 403
- * [ ] Admin accessing /borrower/dashboard → 403
- */
+Route::middleware(['auth', 'borrower'])->prefix('borrower')->name('borrower.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+        $eligibilityService = app(\App\Services\LoanEligibilityService::class);
+        $eligibility = $eligibilityService->check($user);
+        $nextPayment = $eligibilityService->getNextPaymentDue($user);
 
-// Borrower Routes - Protected by 'auth' and 'borrower' middleware
-Route::middleware(['auth', 'borrower'])->group(function () {
-    Route::get('/borrower/dashboard', function () {
-        return view('borrower.dashboard');
-    })->name('borrower.dashboard');
+        return view('borrower.dashboard', [
+            'eligibility' => $eligibility,
+            'nextPayment' => $nextPayment,
+            'loans' => $user->loans()->with('repayments')->orderByDesc('created_at')->take(5)->get(),
+        ]);
+    })->name('dashboard');
+
+    // Wallet Setup (no wallet middleware here)
+    Route::get('/wallet/setup', [WalletController::class, 'setup'])->name('wallet.setup');
+    Route::post('/wallet', [WalletController::class, 'store'])->name('wallet.store');
+
+    // Loan Routes (require wallet)
+    Route::middleware('wallet')->group(function () {
+        Route::get('/loans', [LoanController::class, 'index'])->name('loans.index');
+        Route::get('/loans/create', [LoanController::class, 'create'])->name('loans.create');
+        Route::post('/loans', [LoanController::class, 'store'])->name('loans.store');
+        Route::get('/loans/{loan}', [LoanController::class, 'show'])->name('loans.show');
+
+        // Repayments
+        Route::get('/loans/{loan}/repay', [RepaymentController::class, 'create'])->name('loans.repay');
+        Route::post('/loans/{loan}/repay', [RepaymentController::class, 'store'])->name('loans.repay.store');
+    });
 });
 
-// Admin Routes - Protected by 'auth' and 'admin' middleware
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+// ========================================
+// ADMIN ROUTES
+// ========================================
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', function () {
+        $stats = [
+            'pending' => \App\Models\Loan::pending()->count(),
+            'approved' => \App\Models\Loan::where('status', 'approved')->count(),
+            'disbursed' => \App\Models\Loan::disbursed()->count(),
+            'completed' => \App\Models\Loan::where('status', 'completed')->count(),
+            'total_users' => \App\Models\User::where('role', 'borrower')->count(),
+            'total_disbursed' => \App\Models\Loan::whereIn('status', ['disbursed', 'completed'])->sum('amount'),
+        ];
+        return view('admin.dashboard', compact('stats'));
+    })->name('dashboard');
+
+    // Loan Management
+    Route::get('/loans', [AdminLoanController::class, 'index'])->name('loans.index');
+    Route::get('/loans/{loan}', [AdminLoanController::class, 'show'])->name('loans.show');
+    Route::post('/loans/{loan}/approve', [AdminLoanController::class, 'approve'])->name('loans.approve');
+    Route::post('/loans/{loan}/reject', [AdminLoanController::class, 'reject'])->name('loans.reject');
+    Route::post('/loans/{loan}/disburse', [AdminLoanController::class, 'disburse'])->name('loans.disburse');
 });
 
 require __DIR__ . '/auth.php';
+
