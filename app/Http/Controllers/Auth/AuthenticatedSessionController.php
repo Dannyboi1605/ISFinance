@@ -28,7 +28,24 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        /**
+         * ROLE-BASED REDIRECTION LOGIC
+         * - Admin users are redirected to the admin dashboard.
+         * - Borrower users are redirected to the borrower dashboard.
+         * 
+         * Testing Checklist:
+         * [ ] Login as admin → redirected to admin dashboard
+         * [ ] Login as borrower → redirected to borrower dashboard
+         * [ ] Borrower accessing /admin/dashboard → 403
+         * [ ] Admin accessing /borrower/dashboard → 403
+         */
+        $user = $request->user();
+
+        if ($user->role === 'admin') {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        }
+
+        return redirect()->intended(route('borrower.dashboard', absolute: false));
     }
 
     /**

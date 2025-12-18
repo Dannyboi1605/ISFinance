@@ -26,6 +26,14 @@ Route::middleware('auth')->group(function () {
 // ROLE-BASED ROUTES
 // ========================================
 
+/**
+ * Testing Checklist for Role-Based Access:
+ * [ ] Login as admin → redirected to admin dashboard
+ * [ ] Login as borrower → redirected to borrower dashboard
+ * [ ] Borrower accessing /admin/dashboard → 403
+ * [ ] Admin accessing /borrower/dashboard → 403
+ */
+
 // Borrower Routes - Protected by 'auth' and 'borrower' middleware
 Route::middleware(['auth', 'borrower'])->group(function () {
     Route::get('/borrower/dashboard', function () {

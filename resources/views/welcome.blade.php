@@ -81,11 +81,11 @@
                         class="text-white hover:text-primary-100 transition-colors duration-300 font-medium">
                         About
                     </a>
-                    <a href="#login"
+                    <a href="{{ route('login') }}"
                         class="text-white hover:text-primary-100 transition-colors duration-300 font-medium">
                         Login
                     </a>
-                    <a href="#register"
+                    <a href="{{ route('register') }}"
                         class="bg-white text-primary-600 px-6 py-2 rounded-lg font-semibold hover:bg-primary-50 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                         Register
                     </a>
@@ -113,11 +113,11 @@
                         class="text-white hover:text-primary-100 transition-colors duration-300 font-medium">
                         About
                     </a>
-                    <a href="#login"
+                    <a href="{{ route('login') }}"
                         class="text-white hover:text-primary-100 transition-colors duration-300 font-medium">
                         Login
                     </a>
-                    <a href="#register"
+                    <a href="{{ route('register') }}"
                         class="bg-white text-primary-600 px-6 py-2 rounded-lg font-semibold hover:bg-primary-50 transition-all duration-300 text-center">
                         Register
                     </a>
@@ -149,7 +149,7 @@
 
                         <!-- CTA Buttons -->
                         <div class="flex flex-col sm:flex-row gap-4">
-                            <a href="#login"
+                            <a href="{{ route('login') }}"
                                 class="inline-flex items-center justify-center px-8 py-4 bg-primary-600 text-white font-semibold rounded-lg shadow-lg hover:bg-primary-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -158,7 +158,7 @@
                                 </svg>
                                 Login
                             </a>
-                            <a href="#register"
+                            <a href="{{ route('register') }}"
                                 class="inline-flex items-center justify-center px-8 py-4 bg-white text-primary-600 font-semibold rounded-lg border-2 border-primary-600 shadow-md hover:bg-primary-50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
