@@ -80,8 +80,13 @@ class AdminLoanController extends Controller
                 ->with('error', 'Only pending loans can be rejected.');
         }
 
+        $request->validate([
+            'admin_remark' => 'required|string|max:500',
+        ]);
+
         $loan->update([
             'status' => 'rejected',
+            'admin_remark' => $request->admin_remark,
         ]);
 
         return redirect()->route('admin.loans.index')

@@ -18,8 +18,8 @@ class WalletMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if user is authenticated and has a wallet
-        if (auth()->check() && !auth()->user()->hasWallet()) {
+        // Only target borrowers for the wallet check
+        if (auth()->check() && auth()->user()->role === 'borrower' && !auth()->user()->hasWallet()) {
             return redirect()->route('borrower.wallet.setup')
                 ->with('warning', 'Please set up your wallet before applying for a loan.');
         }

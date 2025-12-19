@@ -32,16 +32,59 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'borrower'])->prefix('borrower')->name('borrower.')->group(function () {
     // Dashboard
+    // Dashboard
     Route::get('/dashboard', function () {
         $user = auth()->user();
-        $eligibilityService = app(\App\Services\LoanEligibilityService::class);
-        $eligibility = $eligibilityService->check($user);
-        $nextPayment = $eligibilityService->getNextPaymentDue($user);
+
+        // 1. Transaction Simulation & Merging
+        $disbursements = $user->loans()
+            ->whereNotNull('disbursed_at')
+            ->get()
+            ->map(function ($loan) {
+                return [
+                    'type' => 'Disbursement',
+                    'loan_id' => $loan->id,
+                    'amount' => $loan->amount,
+                    'date' => $loan->disbursed_at,
+                    'hash' => $loan->contract_address ?? '0xPending...',
+                    'status' => 'Successful'
+                ];
+            });
+
+        $repayments = $user->loans()
+            ->with('repayments')
+            ->get()
+            ->pluck('repayments')
+            ->flatten()
+            ->map(function ($repayment) {
+                return [
+                    'type' => 'Repayment',
+                    'loan_id' => $repayment->loan_id,
+                    'amount' => -$repayment->amount,
+                    'date' => $repayment->paid_at,
+                    'hash' => $repayment->tx_hash,
+                    'status' => 'Successful'
+                ];
+            });
+
+        $transactions = $disbursements->concat($repayments)->sortByDesc('date')->values();
+
+        // 2. Statistics
+        $totalTransactionAmount = $transactions->sum(fn($tx) => abs($tx['amount']));
+        $totalTransactionCount = $transactions->count();
+
+        // 3. Active Loan for Progress
+        $currentLoan = $user->loans()
+            ->whereIn('status', ['disbursed', 'approved'])
+            ->where('remaining_balance', '>', 0)
+            ->first();
 
         return view('borrower.dashboard', [
-            'eligibility' => $eligibility,
-            'nextPayment' => $nextPayment,
-            'loans' => $user->loans()->with('repayments')->orderByDesc('created_at')->take(5)->get(),
+            'wallet' => $user->wallet,
+            'transactions' => $transactions,
+            'totalTransactionAmount' => $totalTransactionAmount,
+            'totalTransactionCount' => $totalTransactionCount,
+            'currentLoan' => $currentLoan,
         ]);
     })->name('dashboard');
 

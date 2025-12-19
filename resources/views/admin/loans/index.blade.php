@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Loan Management') }}
@@ -102,12 +102,12 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-3 py-1 text-xs font-semibold rounded-full
-                                                    @if($loan->status === 'completed') bg-green-100 text-green-800
-                                                    @elseif($loan->status === 'disbursed') bg-blue-100 text-blue-800
-                                                    @elseif($loan->status === 'approved') bg-yellow-100 text-yellow-800
-                                                    @elseif($loan->status === 'pending') bg-gray-100 text-gray-800
-                                                    @else bg-red-100 text-red-800
-                                                    @endif">
+                                                            @if($loan->status === 'completed') bg-green-100 text-green-800
+                                                            @elseif($loan->status === 'disbursed') bg-blue-100 text-blue-800
+                                                            @elseif($loan->status === 'approved') bg-yellow-100 text-yellow-800
+                                                            @elseif($loan->status === 'pending') bg-gray-100 text-gray-800
+                                                            @else bg-red-100 text-red-800
+                                                            @endif">
                                             {{ ucfirst($loan->status) }}
                                         </span>
                                     </td>
@@ -147,4 +147,4 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-admin-layout>

@@ -1,125 +1,113 @@
-<x-app-layout>
+<x-borrower-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Make a Payment') }}
-        </h2>
+        Make a Payment
     </x-slot>
 
-    <div class="py-12 bg-gradient-to-br from-primary-50 via-white to-primary-50 min-h-screen">
-        <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto" x-data="{ repayAmount: '{{ old('amount', $loan->remaining_balance) }}' }">
 
-            {{-- Loan Summary Card --}}
-            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-bold text-gray-900">Loan #{{ $loan->id }}</h3>
-                    <span class="px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
-                        Disbursed
-                    </span>
+        {{-- Progress Header --}}
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-display font-bold text-slate-900">Authorize Repayment</h1>
+            <p class="text-slate-500 mt-2 font-medium">Safe & Secure Blockchain Transaction</p>
+        </div>
+
+        {{-- Loan Overview Card --}}
+        <div
+            class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mb-8">
+            <div class="bg-slate-900 p-8 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-10">
+                    <svg class="w-24 h-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <p class="text-sm text-gray-500">Original Amount</p>
-                        <p class="text-xl font-bold text-gray-900">RM {{ number_format($loan->amount, 2) }}</p>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span
+                            class="px-3 py-1 bg-pink-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg">Active
+                            Contract</span>
+                        <span class="text-slate-400 text-sm font-mono">#{{ $loan->id }}</span>
                     </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Remaining Balance</p>
-                        <p class="text-xl font-bold text-primary-600">RM
-                            {{ number_format($loan->remaining_balance, 2) }}</p>
-                    </div>
-                </div>
-
-                {{-- Progress Bar --}}
-                <div>
-                    <div class="flex justify-between text-xs text-gray-500 mb-1">
-                        <span>Repaid</span>
-                        <span>{{ $loan->progress_percentage }}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-primary-600 h-2 rounded-full" style="width: {{ $loan->progress_percentage }}%">
+                    <div class="grid grid-cols-2 gap-8">
+                        <div>
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Principal</p>
+                            <p class="text-2xl font-bold">RM {{ number_format($loan->amount, 2) }}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Due Balance</p>
+                            <p class="text-2xl font-bold text-pink-400">RM
+                                {{ number_format($loan->remaining_balance, 2) }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Payment Form --}}
-            <form method="POST" action="{{ route('borrower.loans.repay.store', $loan) }}"
-                class="bg-white rounded-2xl shadow-xl p-8">
-                @csrf
+            <div class="p-8">
+                <form method="POST" action="{{ route('borrower.loans.repay.store', $loan) }}">
+                    @csrf
 
-                <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Enter Payment Amount</h3>
-
-                @if(session('error'))
-                    <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded">
-                        <p class="text-red-700">{{ session('error') }}</p>
+                    <div class="mb-8">
+                        <label
+                            class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 text-center">Payment
+                            Amount (RM)</label>
+                        <div class="relative group">
+                            <span
+                                class="absolute left-6 top-1/2 -translate-y-1/2 text-3xl font-bold text-slate-300 transition-colors group-focus-within:text-pink-500">RM</span>
+                            <input type="number" name="amount" x-model="repayAmount" step="0.01" min="1"
+                                max="{{ $loan->remaining_balance }}" required
+                                class="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl pl-20 pr-8 py-6 text-4xl font-bold text-slate-900 focus:ring-4 focus:ring-pink-100 focus:border-pink-500 transition-all placeholder-slate-200"
+                                placeholder="0.00">
+                        </div>
+                        @error('amount')
+                            <p class="mt-3 text-sm text-rose-500 font-bold px-4">{{ $message }}</p>
+                        @enderror
                     </div>
-                @endif
 
-                <div class="mb-6">
-                    <label for="amount" class="block text-sm font-semibold text-gray-700 mb-2">Amount (RM)</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">RM</span>
-                        <input type="number" name="amount" id="amount" min="1" max="{{ $loan->remaining_balance }}"
-                            step="0.01" value="{{ old('amount', $loan->remaining_balance) }}"
-                            class="w-full pl-14 pr-4 py-4 text-2xl font-bold border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('amount') border-red-500 @enderror"
-                            required>
+                    {{-- Quick Actions --}}
+                    <div class="grid grid-cols-3 gap-4 mb-8">
+                        <button type="button" @click="repayAmount = 100"
+                            class="py-3 px-4 bg-slate-50 text-slate-600 font-bold rounded-2xl hover:bg-pink-50 hover:text-pink-600 transition-all border border-slate-100">RM
+                            100</button>
+                        <button type="button" @click="repayAmount = 500"
+                            class="py-3 px-4 bg-slate-50 text-slate-600 font-bold rounded-2xl hover:bg-pink-50 hover:text-pink-600 transition-all border border-slate-100">RM
+                            500</button>
+                        <button type="button" @click="repayAmount = '{{ $loan->remaining_balance }}'"
+                            class="py-3 px-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">Full</button>
                     </div>
-                    @error('amount')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                    <p class="mt-2 text-xs text-gray-500">Maximum: RM {{ number_format($loan->remaining_balance, 2) }}
-                    </p>
-                </div>
 
-                {{-- Quick Amount Buttons --}}
-                <div class="grid grid-cols-3 gap-2 mb-6">
-                    @php
-                        $quickAmounts = [100, 500, 1000];
-                    @endphp
-                    @foreach($quickAmounts as $quickAmount)
-                        @if($quickAmount <= $loan->remaining_balance)
-                            <button type="button" onclick="document.getElementById('amount').value = {{ $quickAmount }}"
-                                class="py-2 px-4 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors">
-                                RM {{ number_format($quickAmount) }}
-                            </button>
-                        @endif
-                    @endforeach
-                    <button type="button"
-                        onclick="document.getElementById('amount').value = {{ $loan->remaining_balance }}"
-                        class="py-2 px-4 bg-primary-100 text-primary-700 font-semibold rounded-lg hover:bg-primary-200 transition-colors col-span-3">
-                        Pay Full Balance (RM {{ number_format($loan->remaining_balance, 2) }})
+                    {{-- Disclaimer --}}
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 mb-8">
+                        <div class="flex gap-4">
+                            <div class="p-2 bg-emerald-500 text-white rounded-lg h-fit">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Secured
+                                    Interaction</h4>
+                                <p class="text-emerald-700/80 text-xs font-medium mt-1 leading-relaxed">
+                                    Repayment will be executed as a Qard Hasan settlement. No processing fees or hidden
+                                    charges applied.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-5 bg-pink-500 text-white rounded-2xl font-bold text-lg shadow-xl shadow-pink-100 hover:bg-pink-600 transition-all transform hover:-translate-y-1">
+                        Confirm Authorization
                     </button>
-                </div>
-
-                {{-- Info Box --}}
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                    <div class="flex">
-                        <svg class="h-5 w-5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                        <p class="ml-3 text-sm text-blue-700">
-                            This payment will be recorded on the simulated blockchain. A transaction hash will be
-                            generated for your records.
-                        </p>
-                    </div>
-                </div>
-
-                <button type="submit"
-                    class="w-full bg-primary-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-primary-700 transition-all shadow-lg hover:shadow-xl">
-                    Confirm Payment
-                </button>
-            </form>
-
-            {{-- Back Link --}}
-            <div class="mt-6 text-center">
-                <a href="{{ route('borrower.loans.show', $loan) }}"
-                    class="text-gray-600 hover:text-primary-600 transition-colors">
-                    ← Back to Loan Details
-                </a>
+                </form>
             </div>
+        </div>
 
+        <div class="text-center">
+            <a href="{{ route('borrower.loans.show', $loan) }}"
+                class="text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors tracking-tight uppercase">
+                ← Return to Contract Details
+            </a>
         </div>
     </div>
-</x-app-layout>
+</x-borrower-layout>
