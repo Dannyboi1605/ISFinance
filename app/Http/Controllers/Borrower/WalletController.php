@@ -70,4 +70,31 @@ class WalletController extends Controller
         return redirect()->route('borrower.dashboard')
             ->with('success', $message);
     }
+
+    /**
+     * Reload the wallet balance (Simulation).
+     */
+    public function reload(Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+        $wallet = $user->wallet;
+
+        if (!$wallet) {
+            return redirect()->route('borrower.wallet.setup')
+                ->with('error', 'Please setup a wallet first.');
+        }
+
+        $request->validate([
+            'amount' => ['required', 'numeric', 'min:1'],
+        ]);
+
+        $amount = (float) $request->input('amount');
+
+        // Simulate a reload
+        $wallet->increment('balance', $amount);
+
+        return redirect()->route('borrower.dashboard')
+            ->with('success', 'Wallet reloaded with RM ' . number_format($amount, 2) . ' successfully!')
+            ->with('tx_hash', $this->generateWalletAddress()); // Simulate a tx hash
+    }
 }

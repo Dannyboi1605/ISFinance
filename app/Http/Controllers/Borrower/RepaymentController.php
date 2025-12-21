@@ -62,10 +62,18 @@ class RepaymentController extends Controller
                 'max:' . $loan->remaining_balance,
             ],
         ], [
-            'amount.max' => 'Repayment amount cannot exceed the remaining balance of RM' . number_format((float) $loan->remaining_balance, 2),
+            'amount.max' => 'You cannot repay more than the outstanding balance of RM ' . number_format((float) $loan->remaining_balance, 2),
         ]);
 
         $amount = (float) $request->input('amount');
+        $wallet = $user->wallet;
+
+        // Check wallet balance
+        if ($wallet->balance < $amount) {
+            return redirect()->back()
+                ->withErrors(['amount' => 'Insufficient funds in your ISFinance wallet.'])
+                ->withInput();
+        }
 
         // Generate blockchain simulation data
         $simulation = $this->simulateConfirmation();
@@ -77,6 +85,9 @@ class RepaymentController extends Controller
             'block_number' => $simulation['block_number'],
             'paid_at' => now(),
         ]);
+
+        // Deduct from wallet balance
+        $wallet->decrement('balance', $amount);
 
         // Update loan remaining balance
         $newBalance = $loan->remaining_balance - $amount;

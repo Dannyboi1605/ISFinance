@@ -21,10 +21,10 @@
         @php
             $menuItems = [
                 ['name' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => 'home'],
-                ['name' => 'Pending Apps', 'route' => 'admin.loans.index', 'params' => ['status' => 'pending'], 'icon' => 'clock'],
+                ['name' => 'Pending Applications', 'route' => 'admin.loans.index', 'params' => ['status' => 'pending'], 'icon' => 'clock'],
                 ['name' => 'Disbursements', 'route' => 'admin.loans.index', 'params' => ['status' => 'approved'], 'icon' => 'cash'],
                 ['name' => 'Active Monitoring', 'route' => 'admin.loans.index', 'params' => ['status' => 'disbursed'], 'icon' => 'presentation-chart-line'],
-                ['name' => 'User Management', 'route' => 'profile.edit', 'icon' => 'users'],
+                ['name' => 'User Management', 'route' => 'admin.users.index', 'icon' => 'users'],
             ];
         @endphp
 
@@ -34,10 +34,10 @@
                     (!isset($item['params']['status']) || request('status') == $item['params']['status']);
             @endphp
             <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group
-                       {{ $isActive
+                           {{ $isActive
             ? 'bg-white text-pink-600 shadow-lg'
             : 'text-white/80 hover:bg-white/10 hover:text-white hover:translate-x-1' 
-                       }}">
+                           }}">
 
                 {{-- Icons --}}
                 @if($item['icon'] === 'home')

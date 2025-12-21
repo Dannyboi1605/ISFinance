@@ -54,16 +54,64 @@
                     </div>
                 </div>
 
-                @if($loan->status === 'disbursed' || $loan->status === 'completed')
-                    {{-- Progress Bar --}}
-                    <div class="mt-6">
-                        <div class="flex justify-between text-sm text-gray-500 mb-2">
-                            <span>Repayment Progress</span>
-                            <span class="font-semibold">{{ $loan->progress_percentage }}%</span>
+                @if(in_array($loan->status, ['disbursed', 'completed']))
+                    {{-- Dynamic Progress UI --}}
+                    @php
+                        $totalAmount = (float) $loan->amount;
+                        $remainingAmount = (float) $loan->remaining_balance;
+                        $paidAmount = $totalAmount - $remainingAmount;
+                        $percentage = $loan->progress_percentage;
+                        $isCompleted = $loan->status === 'completed' || $remainingAmount <= 0;
+                    @endphp
+
+                    <div
+                        class="mt-8 flex flex-col md:flex-row items-center gap-8 bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                        <div x-data="{ 
+                                    percent: 0,
+                                    radius: 50,
+                                    get circumference() { return 2 * Math.PI * this.radius },
+                                    init() {
+                                        setTimeout(() => { this.percent = {{ $isCompleted ? 100 : $percentage }}; }, 100);
+                                    }
+                                }" class="relative inline-flex items-center justify-center w-32 h-32">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 128 128">
+                                <defs>
+                                    <linearGradient id="showPinkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="{{ $isCompleted ? '#10B981' : '#F472B6' }}" />
+                                        <stop offset="100%" stop-color="{{ $isCompleted ? '#059669' : '#DB2777' }}" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="64" cy="64" :r="radius" stroke="currentColor" stroke-width="10"
+                                    fill="transparent" class="text-slate-200" />
+                                <circle cx="64" cy="64" :r="radius" stroke="url(#showPinkGradient)" stroke-width="10"
+                                    fill="transparent" stroke-linecap="round" class="transition-all duration-1000 ease-out"
+                                    :stroke-dasharray="circumference"
+                                    :stroke-dashoffset="circumference - (circumference * percent / 100)" />
+                            </svg>
+                            <span class="absolute text-2xl font-black text-slate-800"
+                                x-text="Math.round(percent) + '%'">0%</span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3">
-                            <div class="bg-primary-600 h-3 rounded-full transition-all duration-500"
-                                style="width: {{ $loan->progress_percentage }}%"></div>
+
+                        <div class="flex-1 space-y-4">
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Repayment
+                                    Progress</h4>
+                                <p class="text-2xl font-black text-slate-900">
+                                    Paid: RM {{ number_format($paidAmount, 2) }} <span class="text-slate-300 font-normal">/
+                                        RM {{ number_format($totalAmount, 2) }}</span>
+                                </p>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="flex-1 bg-white p-3 rounded-xl border border-slate-100">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Principal</p>
+                                    <p class="font-bold text-slate-700">RM {{ number_format($totalAmount, 2) }}</p>
+                                </div>
+                                <div class="flex-1 bg-white p-3 rounded-xl border border-slate-100">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Remaining</p>
+                                    <p class="font-bold text-pink-600">RM {{ number_format($remainingAmount, 2) }}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 @endif

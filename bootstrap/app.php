@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'borrower' => \App\Http\Middleware\BorrowerMiddleware::class,
             'wallet' => \App\Http\Middleware\WalletMiddleware::class,
+            'account_status' => \App\Http\Middleware\CheckAccountStatus::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

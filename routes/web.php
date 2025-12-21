@@ -5,6 +5,7 @@ use App\Http\Controllers\Borrower\WalletController;
 use App\Http\Controllers\Borrower\LoanController;
 use App\Http\Controllers\Borrower\RepaymentController;
 use App\Http\Controllers\Admin\AdminLoanController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,14 +14,18 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return view('home');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'account_status'])->name('dashboard');
 
 // Alternative: Home route (same as dashboard)
 Route::get('/home', function () {
     return view('home');
-})->middleware(['auth', 'verified'])->name('home');
+})->middleware(['auth', 'verified', 'account_status'])->name('home');
 
-Route::middleware('auth')->group(function () {
+Route::get('/suspended', function () {
+    return view('auth.suspended');
+})->name('suspended');
+
+Route::middleware(['auth', 'account_status'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -30,7 +35,7 @@ Route::middleware('auth')->group(function () {
 // BORROWER ROUTES
 // ========================================
 
-Route::middleware(['auth', 'borrower'])->prefix('borrower')->name('borrower.')->group(function () {
+Route::middleware(['auth', 'borrower', 'account_status'])->prefix('borrower')->name('borrower.')->group(function () {
     // Dashboard
     // Dashboard
     Route::get('/dashboard', function () {
@@ -69,21 +74,20 @@ Route::middleware(['auth', 'borrower'])->prefix('borrower')->name('borrower.')->
 
         $transactions = $disbursements->concat($repayments)->sortByDesc('date')->values();
 
-        // 2. Statistics
-        $totalTransactionAmount = $transactions->sum(fn($tx) => abs($tx['amount']));
-        $totalTransactionCount = $transactions->count();
-
         // 3. Active Loan for Progress
-        $currentLoan = $user->loans()
+        $activeLoans = $user->loans()
             ->whereIn('status', ['disbursed', 'approved'])
             ->where('remaining_balance', '>', 0)
-            ->first();
+            ->get();
+
+        $totalDisbursement = $activeLoans->sum('amount');
+        $currentLoan = $activeLoans->first();
 
         return view('borrower.dashboard', [
             'wallet' => $user->wallet,
             'transactions' => $transactions,
-            'totalTransactionAmount' => $totalTransactionAmount,
-            'totalTransactionCount' => $totalTransactionCount,
+            'totalTransactionAmount' => $totalDisbursement,
+            'totalTransactionCount' => $transactions->count(),
             'currentLoan' => $currentLoan,
         ]);
     })->name('dashboard');
@@ -91,6 +95,7 @@ Route::middleware(['auth', 'borrower'])->prefix('borrower')->name('borrower.')->
     // Wallet Setup (no wallet middleware here)
     Route::get('/wallet/setup', [WalletController::class, 'setup'])->name('wallet.setup');
     Route::post('/wallet', [WalletController::class, 'store'])->name('wallet.store');
+    Route::post('/wallet/reload', [WalletController::class, 'reload'])->name('wallet.reload');
 
     // Loan Routes (require wallet)
     Route::middleware('wallet')->group(function () {
@@ -109,7 +114,7 @@ Route::middleware(['auth', 'borrower'])->prefix('borrower')->name('borrower.')->
 // ADMIN ROUTES
 // ========================================
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin', 'account_status'])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard
     Route::get('/dashboard', function () {
         $stats = [
@@ -129,6 +134,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/loans/{loan}/approve', [AdminLoanController::class, 'approve'])->name('loans.approve');
     Route::post('/loans/{loan}/reject', [AdminLoanController::class, 'reject'])->name('loans.reject');
     Route::post('/loans/{loan}/disburse', [AdminLoanController::class, 'disburse'])->name('loans.disburse');
+
+    // User Management
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
 require __DIR__ . '/auth.php';

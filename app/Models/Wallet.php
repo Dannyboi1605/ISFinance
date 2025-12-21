@@ -20,6 +20,7 @@ class Wallet extends Model
         'user_id',
         'wallet_address',
         'type',
+        'balance',
         'is_active',
     ];
 
@@ -30,6 +31,7 @@ class Wallet extends Model
      */
     protected $casts = [
         'is_active' => 'boolean',
+        'balance' => 'decimal:2',
     ];
 
     /**
