@@ -12,13 +12,23 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Role-based Dashboard Redirection
 Route::get('/dashboard', function () {
-    return view('home');
+    $user = auth()->user();
+
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    } elseif ($user->role === 'borrower') {
+        return redirect()->route('borrower.dashboard');
+    }
+
+    // Fallback for unknown roles
+    abort(403, 'Unauthorized access. Invalid user role.');
 })->middleware(['auth', 'verified', 'account_status'])->name('dashboard');
 
 // Alternative: Home route (same as dashboard)
 Route::get('/home', function () {
-    return view('home');
+    return redirect()->route('dashboard');
 })->middleware(['auth', 'verified', 'account_status'])->name('home');
 
 Route::get('/suspended', function () {
@@ -37,60 +47,7 @@ Route::middleware(['auth', 'account_status'])->group(function () {
 
 Route::middleware(['auth', 'borrower', 'account_status'])->prefix('borrower')->name('borrower.')->group(function () {
     // Dashboard
-    // Dashboard
-    Route::get('/dashboard', function () {
-        $user = auth()->user();
-
-        // 1. Transaction Simulation & Merging
-        $disbursements = $user->loans()
-            ->whereNotNull('disbursed_at')
-            ->get()
-            ->map(function ($loan) {
-                return [
-                    'type' => 'Disbursement',
-                    'loan_id' => $loan->id,
-                    'amount' => $loan->amount,
-                    'date' => $loan->disbursed_at,
-                    'hash' => $loan->contract_address ?? '0xPending...',
-                    'status' => 'Successful'
-                ];
-            });
-
-        $repayments = $user->loans()
-            ->with('repayments')
-            ->get()
-            ->pluck('repayments')
-            ->flatten()
-            ->map(function ($repayment) {
-                return [
-                    'type' => 'Repayment',
-                    'loan_id' => $repayment->loan_id,
-                    'amount' => -$repayment->amount,
-                    'date' => $repayment->paid_at,
-                    'hash' => $repayment->tx_hash,
-                    'status' => 'Successful'
-                ];
-            });
-
-        $transactions = $disbursements->concat($repayments)->sortByDesc('date')->values();
-
-        // 3. Active Loan for Progress
-        $activeLoans = $user->loans()
-            ->whereIn('status', ['disbursed', 'approved'])
-            ->where('remaining_balance', '>', 0)
-            ->get();
-
-        $totalDisbursement = $activeLoans->sum('amount');
-        $currentLoan = $activeLoans->first();
-
-        return view('borrower.dashboard', [
-            'wallet' => $user->wallet,
-            'transactions' => $transactions,
-            'totalTransactionAmount' => $totalDisbursement,
-            'totalTransactionCount' => $transactions->count(),
-            'currentLoan' => $currentLoan,
-        ]);
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\Borrower\BorrowerDashboardController::class, 'index'])->name('dashboard');
 
     // Wallet Setup (no wallet middleware here)
     Route::get('/wallet/setup', [WalletController::class, 'setup'])->name('wallet.setup');

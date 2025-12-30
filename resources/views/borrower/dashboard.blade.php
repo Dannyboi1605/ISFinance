@@ -182,13 +182,13 @@
                         $percentage = $currentLoan->progress_percentage;
                     @endphp
                     <div class="text-center mb-6" x-data="{ 
-                                            percent: 0,
-                                            radius: 70,
-                                            get circumference() { return 2 * Math.PI * this.radius },
-                                            init() {
-                                                setTimeout(() => { this.percent = {{ $percentage }}; }, 100);
-                                            }
-                                        }">
+                                                        percent: 0,
+                                                        radius: 70,
+                                                        get circumference() { return 2 * Math.PI * this.radius },
+                                                        init() {
+                                                            setTimeout(() => { this.percent = {{ $percentage }}; }, 100);
+                                                        }
+                                                    }">
                         <div
                             class="inline-flex items-center justify-center w-40 h-40 rounded-full border-8 border-slate-50 relative group">
                             <svg class="w-full h-full transform -rotate-90 drop-shadow-sm" viewBox="0 0 160 160">
@@ -257,39 +257,131 @@
             </div>
 
             <!-- Trends Card -->
-            <div
-                class="lg:col-span-2 bg-white rounded-3xl p-8 shadow-xl shadow-slate-100/50 border border-slate-100 relative overflow-hidden">
-                <div class="flex justify-between items-center mb-10">
+            <div x-data="{ showChartModal: false }"
+                class="lg:col-span-2 bg-white rounded-3xl p-8 shadow-xl shadow-slate-100/50 border border-slate-100 relative overflow-hidden cursor-pointer hover:shadow-2xl hover:border-pink-200 transition-all group"
+                @click="showChartModal = true">
+                <div class="flex justify-between items-center mb-6">
                     <div>
                         <h3 class="font-bold text-slate-800 text-xl">Financial Health</h3>
                         <p class="text-slate-400 text-sm mt-1">Simulated repayment performance</p>
                     </div>
-                    <div class="flex gap-2">
-                        <div class="w-3 h-3 bg-pink-500 rounded-full"></div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">Growth</span>
+                    <div class="flex items-center gap-4">
+                        <div class="flex gap-2 items-center">
+                            <div class="w-3 h-3 bg-pink-500 rounded-full"></div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Growth</span>
+                        </div>
+                        <!-- Expand Icon -->
+                        <div class="p-2 bg-slate-50 rounded-lg group-hover:bg-pink-50 transition-colors">
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-pink-500 transition-colors" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
 
-                <div class="h-48 w-full relative">
-                    <svg class="w-full h-full" preserveAspectRatio="none">
-                        <defs>
-                            <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#EC4899" stop-opacity="0.1" />
-                                <stop offset="100%" stop-color="#EC4899" stop-opacity="0" />
-                            </linearGradient>
-                        </defs>
-                        <path d="M0 80 Q 150 100, 300 50 T 600 30 L 600 150 L 0 150 Z" fill="url(#g1)" />
-                        <path d="M0 80 Q 150 100, 300 50 T 600 30" stroke="#EC4899" stroke-width="4" fill="none"
-                            stroke-linecap="round" />
-                    </svg>
-                    <div
-                        class="absolute bottom-0 left-0 right-0 flex justify-between px-2 text-[10px] text-slate-300 font-bold uppercase tracking-widest pt-4">
-                        <span>Jan</span>
-                        <span>Feb</span>
-                        <span>Mar</span>
-                        <span>Apr</span>
-                        <span>May</span>
-                        <span>Jun</span>
+                <div class="h-40 w-full relative" id="repaymentChart"></div>
+
+                <!-- Chart Modal -->
+                <div x-show="showChartModal" x-cloak @click.stop="showChartModal = false"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                    x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+                    <div @click.stop
+                        x-init="$watch('showChartModal', value => { if (value) setTimeout(() => window.initModalChart(), 100) })"
+                        class="bg-white rounded-3xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-y-auto"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95">
+
+                        <!-- Modal Header -->
+                        <div class="sticky top-0 bg-white border-b border-slate-100 px-8 py-6 rounded-t-3xl z-10">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h2 class="text-3xl font-bold text-slate-800">Financial Health Overview</h2>
+                                    <p class="text-slate-500 mt-1">Detailed repayment performance over the last 6 months
+                                    </p>
+                                </div>
+                                <button @click="showChartModal = false"
+                                    class="p-3 hover:bg-slate-100 rounded-xl transition-colors flex-shrink-0">
+                                    <svg class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="px-8 py-6 space-y-8">
+                            <!-- Expanded Chart Container -->
+                            <div class="bg-slate-50 rounded-2xl p-6">
+                                <div class="h-[400px] w-full" id="repaymentChartModal"></div>
+                            </div>
+
+                            <!-- Chart Stats -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div
+                                    class="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-6 border border-pink-100">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="p-2 bg-pink-500 rounded-lg">
+                                            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total
+                                            Repaid</p>
+                                    </div>
+                                    <p class="text-3xl font-black text-slate-900">RM
+                                        {{ number_format(array_sum($chartData ?? []), 2) }}</p>
+                                    <p class="text-xs text-slate-500 mt-2">Across all transactions</p>
+                                </div>
+
+                                <div
+                                    class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-100">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="p-2 bg-emerald-500 rounded-lg">
+                                            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                            </svg>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Average
+                                            Monthly</p>
+                                    </div>
+                                    <p class="text-3xl font-black text-slate-900">RM
+                                        {{ number_format(count($chartData ?? []) > 0 ? array_sum($chartData ?? []) / count($chartData ?? []) : 0, 2) }}
+                                    </p>
+                                    <p class="text-xs text-slate-500 mt-2">Per month average</p>
+                                </div>
+
+                                <div
+                                    class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="p-2 bg-amber-500 rounded-lg">
+                                            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                            </svg>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            Transactions</p>
+                                    </div>
+                                    <p class="text-3xl font-black text-slate-900">
+                                        {{ count(array_filter($chartData ?? [], fn($v) => $v > 0)) }}</p>
+                                    <p class="text-xs text-slate-500 mt-2">Successful payments</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -359,8 +451,8 @@
                                     <td class="px-6 py-4">
                                         <code
                                             class="text-[11px] font-mono bg-slate-100/50 px-2 py-1 rounded-lg text-slate-600 group-hover:bg-white group-hover:shadow-sm transition-all">
-                                                                {{ substr($tx['hash'], 0, 10) }}...{{ substr($tx['hash'], -6) }}
-                                                            </code>
+                                                                            {{ substr($tx['hash'], 0, 10) }}...{{ substr($tx['hash'], -6) }}
+                                                                        </code>
                                     </td>
                                     <td
                                         class="px-6 py-4 text-right font-bold text-base {{ $tx['type'] === 'Disbursement' ? 'text-emerald-600' : 'text-slate-900' }}">
@@ -413,4 +505,151 @@
         </div>
 
     </div>
+
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Shared chart configuration
+                const chartData = @json($chartData ?? []);
+                const chartLabels = @json($chartLabels ?? []);
+
+                // Base options for both charts
+                const baseOptions = {
+                    series: [{
+                        name: 'Repayments',
+                        data: chartData
+                    }],
+                    chart: {
+                        type: 'area',
+                        fontFamily: 'Outfit, sans-serif',
+                        toolbar: { show: false },
+                        zoom: { enabled: false },
+                        animations: {
+                            enabled: true,
+                            easing: 'easeinout',
+                            speed: 800
+                        }
+                    },
+                    colors: ['#EC4899'],
+                    dataLabels: { enabled: false },
+                    stroke: {
+                        curve: 'smooth',
+                        width: 3
+                    },
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shadeIntensity: 1,
+                            opacityFrom: 0.4,
+                            opacityTo: 0.05,
+                            stops: [0, 90, 100]
+                        }
+                    },
+                    xaxis: {
+                        categories: chartLabels,
+                        axisBorder: { show: false },
+                        axisTicks: { show: false },
+                        labels: {
+                            style: { colors: '#94a3b8', fontSize: '10px', fontFamily: 'Outfit, sans-serif' }
+                        },
+                        tooltip: { enabled: false }
+                    },
+                    yaxis: {
+                        labels: {
+                            formatter: function (value) {
+                                if (value >= 1000) return 'RM ' + (value / 1000).toFixed(1) + 'k';
+                                return 'RM ' + value.toFixed(0);
+                            },
+                            style: { colors: '#94a3b8', fontSize: '10px', fontFamily: 'Outfit, sans-serif' }
+                        }
+                    },
+                    grid: {
+                        show: true,
+                        borderColor: '#f1f5f9',
+                        strokeDashArray: 4,
+                        padding: { top: 0, right: 10, bottom: 0, left: 10 }
+                    },
+                    tooltip: {
+                        theme: 'light',
+                        y: {
+                            formatter: function (val) {
+                                return "RM " + val.toFixed(2)
+                            }
+                        }
+                    }
+                };
+
+                // Card chart (compact)
+                const cardOptions = {
+                    ...baseOptions,
+                    chart: {
+                        ...baseOptions.chart,
+                        height: '100%'
+                    }
+                };
+
+                // Modal chart (expanded with more details)
+                const modalOptions = {
+                    ...baseOptions,
+                    chart: {
+                        ...baseOptions.chart,
+                        height: '100%'
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function (val) {
+                            return val > 0 ? 'RM ' + val.toFixed(0) : '';
+                        },
+                        style: {
+                            fontSize: '11px',
+                            fontWeight: 'bold',
+                            colors: ['#EC4899']
+                        },
+                        background: {
+                            enabled: true,
+                            foreColor: '#fff',
+                            borderRadius: 6,
+                            padding: 4,
+                            opacity: 0.9,
+                            borderWidth: 0
+                        }
+                    },
+                    stroke: {
+                        ...baseOptions.stroke,
+                        width: 4
+                    },
+                    xaxis: {
+                        ...baseOptions.xaxis,
+                        labels: {
+                            style: { colors: '#64748b', fontSize: '12px', fontFamily: 'Outfit, sans-serif', fontWeight: 600 }
+                        }
+                    },
+                    yaxis: {
+                        ...baseOptions.yaxis,
+                        labels: {
+                            ...baseOptions.yaxis.labels,
+                            style: { colors: '#64748b', fontSize: '12px', fontFamily: 'Outfit, sans-serif', fontWeight: 600 }
+                        }
+                    }
+                };
+
+                // Initialize card chart
+                const cardChart = new ApexCharts(document.querySelector("#repaymentChart"), cardOptions);
+                cardChart.render();
+
+                // Store modal chart instance
+                let modalChart = null;
+
+                // Make chart initialization available globally for Alpine.js
+                window.initModalChart = function () {
+                    const modalElement = document.querySelector("#repaymentChartModal");
+                    if (modalElement && !modalChart) {
+                        modalChart = new ApexCharts(modalElement, modalOptions);
+                        modalChart.render();
+                    }
+                };
+            });
+        </script>
+    @endpush
 </x-borrower-layout>
